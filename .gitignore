@@ -1,6 +1,7 @@
 target/
 project/project/
 project/target/
+.bloop
 .idea
 .metals
 .DS_Store
