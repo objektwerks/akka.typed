@@ -6,9 +6,7 @@ import akka.actor.typed.{ActorRef, Behavior}
 import org.scalatest.WordSpecLike
 
 object EchoActor {
-
   case class Message(text: String, sender: ActorRef[Echo])
-
   case class Echo(text: String)
 
   val echoBehavior: Behavior[Message] = Behaviors.receive { (context, message) =>
