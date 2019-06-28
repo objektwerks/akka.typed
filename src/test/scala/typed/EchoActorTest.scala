@@ -12,7 +12,7 @@ object EchoActor {
   val echoBehavior: Behavior[Message] = Behaviors.receive { (context, message) =>
     message match {
       case Message(text, sender) =>
-        context.log.info("Message.text = {}", text)
+        context.log.info("Message.text = {} from {}", text, sender.path.name)
         sender ! Echo(text)
         Behaviors.same
     }
