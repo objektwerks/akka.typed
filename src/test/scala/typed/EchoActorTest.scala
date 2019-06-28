@@ -2,7 +2,7 @@ package typed
 
 import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
 import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.{ActorRef, Behavior}
+import akka.actor.typed.{ActorRef, Behavior, PostStop}
 import org.scalatest.WordSpecLike
 
 object EchoActor {
@@ -16,6 +16,10 @@ object EchoActor {
         sender ! Echo(text)
         Behaviors.same
     }
+  }.receiveSignal {
+    case (context, PostStop) =>
+      context.log.info("EchoActor stopped!")
+      Behaviors.same
   }
 }
 
