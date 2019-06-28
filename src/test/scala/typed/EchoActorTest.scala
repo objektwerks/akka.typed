@@ -21,10 +21,10 @@ object EchoActor {
 class EchoActorTest  extends ScalaTestWithActorTestKit with WordSpecLike {
   import EchoActor._
 
-  "Echo behavior" should {
+  "Echo actor behavior" should {
     "echo message" in {
       val probe = createTestProbe[Echo]()
-      val echo = testKit.spawn(echoActor, "echo")
+      val echo = spawn(echoActor, "echo")
       echo ! Message("ping", probe.ref)
       probe.expectMessage(Echo("ping"))
     }
