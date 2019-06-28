@@ -1,11 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
-        <layout class="ch.qos.logback.classic.PatternLayout">
-            <pattern>%X{akkaTimestamp} %-5level %logger{36} %X{akkaSource} - %msg%n</pattern>
-        </layout>
-    </appender>
-    <appender name="file" class="ch.qos.logback.core.FileAppender">
+   <appender name="file" class="ch.qos.logback.core.FileAppender">
         <file>./target/apps.log</file>
         <append>true</append>
         <encoder>
@@ -13,7 +8,6 @@
         </encoder>
     </appender>
     <root level="INFO">
-        <appender-ref ref="console"/>
         <appender-ref ref="file"/>
     </root>
 </configuration>
