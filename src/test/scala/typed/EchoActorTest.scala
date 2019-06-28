@@ -6,27 +6,27 @@ import akka.actor.typed.scaladsl.Behaviors
 import org.scalatest.WordSpecLike
 
 object EchoActor {
-  case class Message(message: String, response: ActorRef[Echo])
-  case class Echo(message: String)
+  case class Message(text: String, sender: ActorRef[Echo])
+  case class Echo(text: String)
 
-  val echoActor: Behavior[Message] = Behaviors.receive {
+  val echoBehavior: Behavior[Message] = Behaviors.receive {
     (_, message) => message match {
-      case Message(m, replyTo) =>
-        replyTo ! Echo(m)
+      case Message(text, sender) =>
+        sender ! Echo(text)
         Behaviors.same
     }
   }
 }
 
-class EchoActorTest  extends ScalaTestWithActorTestKit with WordSpecLike {
+class EchoActorTest extends ScalaTestWithActorTestKit with WordSpecLike {
   import EchoActor._
 
   "Echo actor behavior" should {
     "echo message" in {
-      val probe = createTestProbe[Echo]()
-      val echo = spawn(echoActor, "echo")
-      echo ! Message("ping", probe.ref)
-      probe.expectMessage(Echo("ping"))
+      val testProbe = createTestProbe[Echo]("test-probe")
+      val echoActor = spawn(echoBehavior, "echo-actor")
+      echoActor ! Message("ping", testProbe.ref)
+      testProbe.expectMessage(Echo("ping"))
     }
   }
 }
