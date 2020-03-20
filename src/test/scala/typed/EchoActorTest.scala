@@ -1,9 +1,9 @@
 package typed
 
 import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
-import akka.actor.typed.{ActorRef, PostStop}
 import akka.actor.typed.scaladsl.Behaviors
-import org.scalatest.WordSpecLike
+import akka.actor.typed.{ActorRef, PostStop}
+import org.scalatest.wordspec.AnyWordSpecLike
 
 object EchoActor {
   case class Message(text: String, sender: ActorRef[Echo])
@@ -12,7 +12,7 @@ object EchoActor {
   val echoActorBehavior = Behaviors.receive[Message] { (context, message) =>
     message match {
       case Message(text, sender) =>
-        context.log.info("Message.text = {} from {}", text, sender.path.name)
+        context.log.info(s"Message.text = $text from ${sender.path.name}")
         sender ! Echo(text)
         Behaviors.same
     }
@@ -23,7 +23,7 @@ object EchoActor {
   }
 }
 
-class EchoActorTest extends ScalaTestWithActorTestKit with WordSpecLike {
+class EchoActorTest extends ScalaTestWithActorTestKit with AnyWordSpecLike {
   import EchoActor._
 
   "Echo actor behavior" should {
