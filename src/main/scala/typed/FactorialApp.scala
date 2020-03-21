@@ -20,7 +20,7 @@ object FactorialActor {
   val factorialActorBehavior = Behaviors.receive[Message] { (context, message) =>
     message match {
       case CalculateFactorials(numbers, sender) =>
-        context.log.info(s"CalculateFactorial.numbers = $numbers from ${sender.path.name}")
+        context.log.info("CalculateFactorial.numbers = {} from {}", numbers, sender.path.name)
         sender ! FactorialsCalculated(numbers.map(n => factorial(n)))
         Behaviors.same
       case _:Message => Behaviors.same
