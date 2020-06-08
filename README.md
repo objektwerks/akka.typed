@@ -1,6 +1,6 @@
 Akka Typed
 ----------
->This project contains Akka typed feature tests.
+>This project contains an Akka Typed app and test.
 
 Test
 ----
