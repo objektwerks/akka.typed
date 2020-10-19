@@ -72,7 +72,7 @@ object FactorialApp extends App {
       case (_, Terminated(_)) =>
         context.log.info("DelegateActor stopped!")
         context.log.info("FactorialApp stopped!")
-        context.system.terminate
+        context.system.terminate()
         Behaviors.stopped
     }
   }
