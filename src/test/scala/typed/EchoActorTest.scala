@@ -14,13 +14,13 @@ object EchoActor {
   val echoActorBehavior = Behaviors.receive[Message] { (context, message) =>
     message match {
       case Message(text, sender) =>
-        context.log.info("Message.text = {} from {}", text, sender.path.name)
+        context.log.info("*** Message.text = {} from {}", text, sender.path.name)
         sender ! Echo(text)
         Behaviors.same
     }
   }.receiveSignal {
     case (context, PostStop) =>
-      context.log.info("EchoActor stopped!")
+      context.log.info("*** EchoActor stopped!")
       Behaviors.same
   }
 }
