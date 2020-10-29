@@ -3,11 +3,13 @@ package typed
 import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed.{ActorRef, PostStop}
+
 import org.scalatest.wordspec.AnyWordSpecLike
 
 object EchoActor {
-  case class Message(text: String, sender: ActorRef[Echo])
-  case class Echo(text: String)
+  sealed trait Entity extends Product with Serializable
+  final case class Message(text: String, sender: ActorRef[Echo]) extends Entity
+  final case class Echo(text: String) extends Entity
 
   val echoActorBehavior = Behaviors.receive[Message] { (context, message) =>
     message match {

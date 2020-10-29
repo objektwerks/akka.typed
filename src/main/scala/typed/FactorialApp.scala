@@ -3,15 +3,16 @@ package typed
 import akka.NotUsed
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed._
+
 import typed.FactorialActor.factorialActorBehavior
 
 import scala.annotation.tailrec
 
 object Messages {
-  sealed trait Message
-  case class Numbers(numbers: List[Long]) extends Message
-  case class CalculateFactorials(numbers: List[Long], sender: ActorRef[FactorialsCalculated]) extends Message
-  case class FactorialsCalculated(numbers: List[Long]) extends Message
+  sealed trait Message extends Product with Serializable
+  final case class Numbers(numbers: List[Long]) extends Message
+  final case class CalculateFactorials(numbers: List[Long], sender: ActorRef[FactorialsCalculated]) extends Message
+  final case class FactorialsCalculated(numbers: List[Long]) extends Message
 }
 
 object FactorialActor {
