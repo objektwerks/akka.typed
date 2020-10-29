@@ -12,17 +12,18 @@ object OnOffActor {
   case object On extends State
   case object Off extends State
 
-  def onOffActorBehavior(state: Int = 0): Behavior[State] = Behaviors.setup { context =>
-    Behaviors.receiveMessage {
-      case On =>
-        context.log.info(s"*** (1) On!")
-        onOffActorBehavior(state + 1)
-      case Off =>
-        context.log.info(s"*** (0) Off")
-        onOffActorBehavior(state - 1)
+  def onOffActorBehavior(state: Int = 0): Behavior[State] =
+    Behaviors.receive { (context, message) =>
+      message match {
+        case On =>
+          context.log.info(s"*** (1) On!")
+          onOffActorBehavior(state + 1)
+        case Off =>
+          context.log.info(s"*** (0) Off")
+          onOffActorBehavior(state - 1)
+      }
     }
   }
-}
 
 class StatelessActorTest extends ScalaTestWithActorTestKit with AnyWordSpecLike {
   import OnOffActor._
