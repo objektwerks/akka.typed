@@ -57,7 +57,7 @@ object DelegateActor {
   }
 }
 
-object FactorialApp extends App {
+object FactorialApp {
   val factorialAppBehavior = Behaviors.setup[NotUsed] { context =>
     import DelegateActor._
     import Messages._
@@ -78,4 +78,8 @@ object FactorialApp extends App {
     }
   }
   val system = ActorSystem(factorialAppBehavior, "factorial-app")
+
+  def main(args: Array[String]): Unit = {
+    println("*** FactorialApp main invoked!")
+  }
 }
