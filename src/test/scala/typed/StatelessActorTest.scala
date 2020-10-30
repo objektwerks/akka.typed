@@ -4,37 +4,37 @@ import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
 
 import org.scalatest.wordspec.AnyWordSpecLike
 
-object OnOffActor {
+object CountActor {
   import akka.actor.typed.Behavior
   import akka.actor.typed.scaladsl.Behaviors
 
-  sealed trait State extends Product with Serializable
-  case object On extends State
-  case object Off extends State
+  sealed trait Count extends Product with Serializable
+  case object Increment extends Count
+  case object Decrement extends Count
 
-  def onOffActorBehavior(state: Int = 0): Behavior[State] =
+  def onOffActorBehavior(count: Int = 0): Behavior[Count] =
     Behaviors.receive { (context, message) =>
       message match {
-        case On =>
-          context.log.info(s"*** (1) On!")
-          onOffActorBehavior(state + 1)
-        case Off =>
-          context.log.info(s"*** (0) Off")
-          onOffActorBehavior(state - 1)
+        case Increment =>
+          context.log.info(s"*** Increment +1, Count: ${count + 1}")
+          onOffActorBehavior(count + 1)
+        case Decrement =>
+          context.log.info(s"*** Decrement -1, Count: ${count - 1}")
+          onOffActorBehavior(count - 1)
       }
     }
   }
 
 class StatelessActorTest extends ScalaTestWithActorTestKit with AnyWordSpecLike {
-  import OnOffActor._
+  import CountActor._
 
-  "Emotion actor behavior" should {
-    "emotions" in {
-      val testProbe = createTestProbe[State]("test-on-off")
-      val onOffActor = spawn(onOffActorBehavior(0), "on-off-actor")
-      onOffActor ! On
+  "CountActor behavior" should {
+    "increment / decrement" in {
+      val testProbe = createTestProbe[Count]("test-count")
+      val countActor = spawn(onOffActorBehavior(0), "count-actor")
+      countActor ! Increment
       testProbe.expectNoMessage()
-      onOffActor ! Off
+      countActor ! Decrement
       testProbe.expectNoMessage()
     }
   }

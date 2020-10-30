@@ -6,7 +6,7 @@ import akka.actor.typed.{ActorRef, PostStop}
 
 import org.scalatest.wordspec.AnyWordSpecLike
 
-object EchoActor {
+object MessageActor {
   sealed trait Entity extends Product with Serializable
   final case class Message(text: String, sender: ActorRef[Echo]) extends Entity
   final case class Echo(text: String) extends Entity
@@ -20,20 +20,20 @@ object EchoActor {
     }
   }.receiveSignal {
     case (context, PostStop) =>
-      context.log.info("*** EchoActor stopped!")
+      context.log.info("*** MessageActor stopped!")
       Behaviors.same
   }
 }
 
-class EchoActorTest extends ScalaTestWithActorTestKit with AnyWordSpecLike {
-  import EchoActor._
+class MessageActorTest extends ScalaTestWithActorTestKit with AnyWordSpecLike {
+  import MessageActor._
 
-  "Echo actor behavior" should {
-    "echo message" in {
+  "MessageActor behavior" should {
+    "message / echo" in {
       val testProbe = createTestProbe[Echo]("test-probe")
-      val echoActor = spawn(echoActorBehavior, "echo-actor")
-      echoActor ! Message("ping", testProbe.ref)
-      testProbe.expectMessage(Echo("ping"))
+      val messageActor = spawn(echoActorBehavior, "message-actor")
+      messageActor ! Message("test", testProbe.ref)
+      testProbe.expectMessage(Echo("test"))
     }
   }
 }
