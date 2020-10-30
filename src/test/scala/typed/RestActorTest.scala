@@ -26,8 +26,8 @@ object Rest {
     client.singleRequest( HttpRequest(uri = "http://api.icndb.com/jokes/random/") ).flatMap { response =>
       Unmarshal(response)
         .to[String]
-        .map { json => s"<p>${parseJson(json)}</p>" }
-        .recover { case error => s"<p>${error.getMessage}</p>" }
+        .map { json => s"${parseJson(json)}" }
+        .recover { case error => s"${error.getMessage}" }
     }
   }
 
