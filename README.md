@@ -1,6 +1,6 @@
 Akka Typed
 ----------
->This project contains an Akka Typed app and test.
+>Akka Typed app and tests, to include an Akka-Http rest client.
 
 Test
 ----
