@@ -9,7 +9,7 @@ libraryDependencies ++= {
     "com.typesafe.akka" %% "akka-actor-typed" % akkaVersion,
     "com.typesafe.akka" %% "akka-stream" % akkaVersion,
     "com.typesafe.akka" %% "akka-slf4j" % akkaVersion,
-    "com.typesafe.akka" %% "akka-http" % "10.2.3",
+    "com.typesafe.akka" %% "akka-http" % "10.2.4",
     "ch.qos.logback" % "logback-classic" % "1.2.3",
     "org.json4s" %% "json4s-jackson" % json4sVersion,
     "org.json4s" %% "json4s-native" % json4sVersion,
