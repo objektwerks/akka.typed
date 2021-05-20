@@ -1,7 +1,7 @@
 name := "akka.typed"
 organization := "objektwerks"
 version := "0.1-SNAPSHOT"
-scalaVersion := "2.13.5"
+scalaVersion := "2.13.6"
 libraryDependencies ++= {
   val akkaVersion = "2.6.14"
   val json4sVersion = "3.6.10"
