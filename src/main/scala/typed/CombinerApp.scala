@@ -24,15 +24,21 @@ object CombinerActor {
 
   val commandHandler: (State, Command) => Effect[Event, State] = { (_, command) =>
     command match {
-      case Add(data) => Effect.persist(Added(data))
-      case Clear => Effect.persist(Cleared)
+      case Add(data) => Effect.persist(Added(data)).thenRun(state => println(s"Add data: $data state: $state"))
+      case Clear => Effect.persist(Cleared).thenRun(state => println(s"Clean state: $state"))
     }
   }
 
   val eventHandler: (State, Event) => State = { (state, event) =>
     event match {
-      case Added(data) => state.copy((data :: state.history))
-      case Cleared => State(Nil)
+      case Added(data) =>
+        val newState = state.copy((data :: state.history))
+        println(s"Added data: $data state: $newState")
+        newState
+      case Cleared => 
+        val newState = State(Nil)
+        println(s"Cleared state: $newState")
+        newState
     }
   }
 

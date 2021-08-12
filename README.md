@@ -8,4 +8,7 @@ Test
 
 Run
 ---
-1. sbt clean compile run
+1. sbt run
+>Multiple main classes detected. Select one to run:
+1. typed.CombinerApp
+2. typed.FactorialApp
