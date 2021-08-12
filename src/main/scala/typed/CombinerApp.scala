@@ -20,6 +20,8 @@ case object Cleared extends Event
 final case class State(history: List[String] = Nil)
 
 object CombinerActor {
+  val id = CombinerActor.getClass.getSimpleName
+
   val commandHandler: (State, Command) => Effect[Event, State] = { (_, command) =>
     command match {
       case Add(data) => Effect.persist(Added(data))
@@ -46,10 +48,10 @@ object CombinerApp {
   val appBehavior = Behaviors.setup[NotUsed] { context =>
     context.log.info("*** CombinerApp started!")
 
-    val combinerActor = context.spawn(CombinerActor(CombinerActor.getClass.getSimpleName), "combiner-actor")
+    val combinerActor = context.spawn(CombinerActor(CombinerActor.id), "combiner-actor")
     context.log.info("*** CombinerActor started!")
     context.watch(combinerActor)
-    combinerActor ! Add("hello, ")
+    combinerActor ! Add("Hello, ")
     combinerActor ! Add("world!")
     combinerActor ! Clear
     
