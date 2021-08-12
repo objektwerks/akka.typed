@@ -60,6 +60,9 @@ object CombinerApp {
     combinerActor ! Add("world!")
     combinerActor ! Clear
 
+    Thread.sleep(3000L)
+    context.stop(combinerActor)
+
     Behaviors.receiveSignal {
       case (_, Terminated(_)) =>
         context.log.info("*** CombinerActor stopped!")
