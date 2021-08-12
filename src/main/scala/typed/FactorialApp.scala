@@ -58,7 +58,7 @@ object DelegateActor {
 }
 
 object FactorialApp {
-  val factorialAppBehavior = Behaviors.setup[NotUsed] { context =>
+  val appBehavior = Behaviors.setup[NotUsed] { context =>
     import DelegateActor._
     import Messages._
 
@@ -77,7 +77,7 @@ object FactorialApp {
         Behaviors.stopped
     }
   }
-  val system = ActorSystem(factorialAppBehavior, "factorial-app")
+  val system = ActorSystem(appBehavior, "factorial-app")
 
   def main(args: Array[String]): Unit = {
     println("*** FactorialApp main invoked!")
