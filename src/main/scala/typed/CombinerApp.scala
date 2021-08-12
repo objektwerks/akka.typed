@@ -56,12 +56,8 @@ object CombinerApp {
     val combinerActor = context.spawn(CombinerActor(CombinerActor.id), "combiner-actor")
     context.log.info("*** CombinerActor started!")
     context.watch(combinerActor)
-    combinerActor ! Add("Hello, ")
-    combinerActor ! Add("world!")
+    combinerActor ! Add("Hello, world!")
     combinerActor ! Clear
-
-    Thread.sleep(3000L)
-    context.stop(combinerActor)
 
     Behaviors.receiveSignal {
       case (_, Terminated(_)) =>
