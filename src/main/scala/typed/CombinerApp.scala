@@ -61,8 +61,9 @@ object CombinerApp {
   val system = ActorSystem(appBehavior, "combiner-app")
 
   def main(args: Array[String]): Unit = {
-    println("*** CombinerApp running!")
+    println("*** CombinerApp running ...")
     Thread.sleep(1000L)
     system.terminate()
+    println("*** CombinerApp terminated!")
   }
 }

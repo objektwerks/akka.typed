@@ -62,8 +62,6 @@ object FactorialApp {
     import DelegateActor._
     import Messages._
 
-    context.log.info("*** FactorialApp started!")
-
     val delegateActor = context.spawn(delegateActorBehavior, "delegate-actor")
     context.log.info("*** DelegateActor started!")
     context.watch(delegateActor)
@@ -72,7 +70,7 @@ object FactorialApp {
     Behaviors.receiveSignal {
       case (_, Terminated(_)) =>
         context.log.info("*** DelegateActor stopped!")
-        context.log.info("*** FactorialApp stopped!")
+        context.log.info("*** FactorialApp terminated!")
         context.system.terminate()
         Behaviors.stopped
     }
@@ -80,6 +78,6 @@ object FactorialApp {
   val system = ActorSystem(appBehavior, "factorial-app")
 
   def main(args: Array[String]): Unit = {
-    println("*** FactorialApp main invoked!")
+    println("*** FactorialApp running!")
   }
 }
