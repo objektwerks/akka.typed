@@ -8,6 +8,7 @@ libraryDependencies ++= {
   val json4sVersion = "4.0.3"
   Seq(
     "com.typesafe.akka" %% "akka-actor-typed" % akkaVersion,
+    "com.typesafe.akka" %% "akka-persistence-typed" % akkaVersion,
     "com.typesafe.akka" %% "akka-stream" % akkaVersion,
     "com.typesafe.akka" %% "akka-slf4j" % akkaVersion,
     "com.typesafe.akka" %% "akka-http" % akkaHttpVersion,
