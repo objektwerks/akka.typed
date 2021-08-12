@@ -34,20 +34,19 @@ object CombinerActor {
     }
   }
 
-  def apply(): Behavior[Command] =
+  def apply(id: String): Behavior[Command] =
     EventSourcedBehavior[Command, Event, State](
-      persistenceId = PersistenceId.ofUniqueId(CombinerActor.getClass.getSimpleName()),
-      emptyState = State(),
-      commandHandler = (state, command) => commandHandler( state, command ),
-      eventHandler = (state, event) => eventHandler( state, event )
-    )
+      persistenceId = PersistenceId.ofUniqueId(id),
+      emptyState = State(Nil),
+      commandHandler = commandHandler,
+      eventHandler = eventHandler)
 }
 
 object CombinerApp {
   val appBehavior = Behaviors.setup[NotUsed] { context =>
     context.log.info("*** CombinerApp started!")
 
-    val combinerActor = context.spawn(CombinerActor(), "combiner-actor")
+    val combinerActor = context.spawn(CombinerActor(CombinerActor.getClass.getSimpleName), "combiner-actor")
     context.log.info("*** CombinerActor started!")
     context.watch(combinerActor)
     combinerActor ! Add("hello, ")
