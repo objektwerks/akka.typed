@@ -7,11 +7,11 @@ import akka.actor.typed.scaladsl.Behaviors
 import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
 import akka.persistence.typed.PersistenceId
 
-sealed trait Command
+sealed trait Command extends Product with Serializable
 final case class Add(data: String) extends Command
 case object Clear extends Command
 
-sealed trait Event
+sealed trait Event extends Product with Serializable
 final case class Added(data: String) extends Event
 case object Cleared extends Event
 
