@@ -1,9 +1,7 @@
 package typed
 
 import akka.NotUsed
-import akka.actor.typed.Terminated
-import akka.actor.typed.ActorSystem
-import akka.actor.typed.Behavior
+import akka.actor.typed._
 import akka.actor.typed.scaladsl.Behaviors
 
 import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
@@ -24,8 +22,8 @@ object CombinerActor {
 
   val commandHandler: (State, Command) => Effect[Event, State] = { (_, command) =>
     command match {
-      case Add(data) => Effect.persist(Added(data)).thenRun(state => println(s"Add data: $data state: $state"))
-      case Clear => Effect.persist(Cleared).thenRun(state => println(s"Clean state: $state"))
+      case Add(data) => Effect.persist(Added(data)).thenRun(state => println(s"*** Add data: $data state: $state"))
+      case Clear => Effect.persist(Cleared).thenRun(state => println(s"*** Clear state: $state"))
     }
   }
 
@@ -33,11 +31,11 @@ object CombinerActor {
     event match {
       case Added(data) =>
         val newState = state.copy((data :: state.history))
-        println(s"Added data: $data state: $newState")
+        println(s"*** Added data: $data state: $newState")
         newState
       case Cleared => 
         val newState = State(Nil)
-        println(s"Cleared state: $newState")
+        println(s"*** Cleared state: $newState")
         newState
     }
   }
@@ -47,7 +45,8 @@ object CombinerActor {
       persistenceId = PersistenceId.ofUniqueId(id),
       emptyState = State(Nil),
       commandHandler = commandHandler,
-      eventHandler = eventHandler)
+      eventHandler = eventHandler
+    )
 }
 
 object CombinerApp {
@@ -60,7 +59,7 @@ object CombinerApp {
     combinerActor ! Add("Hello, ")
     combinerActor ! Add("world!")
     combinerActor ! Clear
-    
+
     Behaviors.receiveSignal {
       case (_, Terminated(_)) =>
         context.log.info("*** CombinerActor stopped!")

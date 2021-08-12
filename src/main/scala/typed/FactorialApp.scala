@@ -24,7 +24,7 @@ object FactorialActor {
         context.log.info("*** CalculateFactorial.numbers = {} from {}", numbers, sender.path.name)
         sender ! FactorialsCalculated(numbers.map(n => factorial(n)))
         Behaviors.same
-      case _:Message => Behaviors.same
+      case _: Message => Behaviors.same
     }
   }.receiveSignal {
     case (context, PostStop) =>
