@@ -51,25 +51,18 @@ object CombinerActor {
 
 object CombinerApp {
   val appBehavior = Behaviors.setup[NotUsed] { context =>
-    context.log.info("*** CombinerApp started!")
-
     val combinerActor = context.spawn(CombinerActor(CombinerActor.id), "combiner-actor")
     context.log.info("*** CombinerActor started!")
     context.watch(combinerActor)
     combinerActor ! Add("Hello, world!")
     combinerActor ! Clear
-
-    Behaviors.receiveSignal {
-      case (_, Terminated(_)) =>
-        context.log.info("*** CombinerActor stopped!")
-        context.log.info("*** CombinerApp stopped!")
-        context.system.terminate()
-        Behaviors.stopped
-    }
+    Behaviors.same
   }
   val system = ActorSystem(appBehavior, "combiner-app")
 
   def main(args: Array[String]): Unit = {
-    println("*** CombinerApp main invoked!")
+    println("*** CombinerApp running!")
+    Thread.sleep(1000L)
+    system.terminate()
   }
 }
