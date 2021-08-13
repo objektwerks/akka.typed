@@ -1,6 +1,5 @@
 package typed
 
-import akka.NotUsed
 import akka.actor.typed._
 import akka.actor.typed.scaladsl.Behaviors
 
@@ -50,20 +49,30 @@ object CombinerActor {
 }
 
 object CombinerApp {
-  def main(args: Array[String]): Unit = {
-    val behavior = Behaviors.setup[NotUsed] { context =>
-      val combinerActor = context.spawn(CombinerActor(CombinerActor.id), "combiner-actor")
-      context.log.info("*** CombinerActor started!")
-      context.watch(combinerActor)
-      combinerActor ! Add("Hello, ")
-      combinerActor ! Add("world!")
-      combinerActor ! Clear
-      Behaviors.same
+  def apply(): Behavior[Command] = Behaviors.setup { context =>
+    val combinerActor = context.spawn(CombinerActor(CombinerActor.id), "combiner-actor")
+    context.log.info("*** CombinerActor started!")
+    context.watch(combinerActor)
+    Behaviors.receiveMessage[Command] { command =>
+      command match {
+        case add : Add =>
+          combinerActor ! add
+          Behaviors.same
+        case Clear =>
+          combinerActor ! Clear
+          Behaviors.same
+      }
     }
-    val system = ActorSystem(behavior, "combiner-app")
-    println("*** CombinerApp running ...")
+  }
+  
+  def main(args: Array[String]): Unit = {
+    val system = ActorSystem[Command](CombinerApp(), "combiner-app")
+    system.log.info("*** CombinerApp running ...")
+    system ! Add("Hello, ")
+    system ! Add("world!")
+    system ! Clear
     Thread.sleep(1000L)
+    system.log.info("*** CombinerApp terminated!")
     system.terminate()
-    println("*** CombinerApp terminated!")
   }
 }
