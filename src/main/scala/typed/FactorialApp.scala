@@ -5,18 +5,19 @@ import akka.actor.typed.scaladsl.Behaviors
 
 import scala.annotation.tailrec
 
-final case class Numbers(numbers: List[Long]) extends Message
-final case class CalculateFactorials(numbers: List[Long], sender: ActorRef[FactorialsCalculated]) extends Message
-final case class FactorialsCalculated(numbers: List[Long]) extends Message
+sealed trait Calculation extends Product with Serializable
+final case class Numbers(numbers: List[Long]) extends Calculation
+final case class CalculateFactorials(numbers: List[Long], sender: ActorRef[FactorialsCalculated]) extends Calculation
+final case class FactorialsCalculated(numbers: List[Long]) extends Calculation
 
 object FactorialActor {
-  def apply(): Behavior[Message] = Behaviors.receive[Message] { (context, message) =>
-    message match {
+  def apply(): Behavior[Calculation] = Behaviors.receive[Calculation] { (context, calculation) =>
+    calculation match {
       case CalculateFactorials(numbers, sender) =>
         context.log.info("*** CalculateFactorial numbers: {} sender: {}", numbers, sender.path.name)
         sender ! FactorialsCalculated(numbers.map(n => factorial(n)))
         Behaviors.same
-      case _: Message => Behaviors.same
+      case _: Calculation => Behaviors.same
     }
   }.receiveSignal {
     case (context, PostStop) =>
@@ -32,7 +33,7 @@ object FactorialActor {
 }
 
 object DelegateActor {
-  def apply(): Behavior[Message] = Behaviors.receive[Message] { (context, message) =>
+  def apply(): Behavior[Calculation] = Behaviors.receive[Calculation] { (context, message) =>
     message match {
       case Numbers(numbers) =>
         context.log.info("*** Numbers = {}", numbers)
@@ -42,7 +43,7 @@ object DelegateActor {
       case FactorialsCalculated(numbers) =>
         context.log.info("*** FactorialsCalculated numbers: {}", numbers)
         Behaviors.stopped
-      case _: Message => Behaviors.same
+      case _: Calculation => Behaviors.same
     }
   }
 }

@@ -8,11 +8,11 @@ import akka.event.slf4j.Logger
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
 
-sealed trait Command extends Message
+sealed trait Command extends Product with Serializable
 final case class Add(data: String) extends Command
 case object Clear extends Command
 
-sealed trait Event extends Message
+sealed trait Event extends Product with Serializable
 final case class Added(data: String) extends Event
 case object Cleared extends Event
 
@@ -35,7 +35,7 @@ object CombinerActor {
   val eventHandler: (State, Event) => State = (state, event) =>
     event match {
       case Added(data) =>
-        val newState = state.copy((data :: state.history))
+        val newState = state.copy(data :: state.history)
         log.info("*** Added data: {} state: {}", data, newState)
         newState
       case Cleared => 
@@ -58,15 +58,13 @@ object CombinerApp {
     val combinerActor = context.spawn(CombinerActor(CombinerActor.id), "combiner-actor")
     context.log.info("*** CombinerActor started!")
     context.watch(combinerActor)
-    Behaviors.receiveMessage[Command] { command =>
-      command match {
-        case add : Add =>
-          combinerActor ! add
-          Behaviors.same
-        case Clear =>
-          combinerActor ! Clear
-          Behaviors.same
-      }
+    Behaviors.receiveMessage[Command] {
+      case add: Add =>
+        combinerActor ! add
+        Behaviors.same
+      case Clear =>
+        combinerActor ! Clear
+        Behaviors.same
     }
   }
   
