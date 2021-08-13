@@ -7,30 +7,30 @@ import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
 import org.scalatest.wordspec.AnyWordSpecLike
 
 sealed trait Entity extends Product with Serializable
-final case class Message(text: String, sender: ActorRef[Echo]) extends Entity
+final case class Text(text: String, sender: ActorRef[Echo]) extends Entity
 final case class Echo(text: String) extends Entity
 
-object MessageActor {
-  def apply(): Behavior[Message] = Behaviors.receive[Message] { (context, message) =>
-    message match {
-      case Message(text, sender) =>
-        context.log.info("*** Message.text = {} from {}", text, sender.path.name)
+object TextActor {
+  def apply(): Behavior[Text] = Behaviors.receive[Text] { (context, text) =>
+    text match {
+      case Text(text, sender) =>
+        context.log.info("*** Text = {} from {}", text, sender.path.name)
         sender ! Echo(text)
         Behaviors.same
     }
   }.receiveSignal {
     case (context, PostStop) =>
-      context.log.info("*** MessageActor stopped!")
+      context.log.info("*** TextActor stopped!")
       Behaviors.same
   }
 }
 
-class MessageActorTest extends ScalaTestWithActorTestKit with AnyWordSpecLike {
-  "MessageActor behavior" should {
+class TextActorTest extends ScalaTestWithActorTestKit with AnyWordSpecLike {
+  "TextActor behavior" should {
     "message / echo" in {
       val testProbe = createTestProbe[Echo]("test-probe")
-      val messageActor = spawn(MessageActor(), "message-actor")
-      messageActor ! Message("test", testProbe.ref)
+      val textActor = spawn(TextActor(), "text-actor")
+      textActor ! Text("test", testProbe.ref)
       testProbe.expectMessage(Echo("test"))
     }
   }
