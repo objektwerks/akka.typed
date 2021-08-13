@@ -1,11 +1,10 @@
 package typed
 
-import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
+import akka.actor.typed.{ActorRef, Behavior, PostStop}
 import akka.actor.typed.scaladsl.Behaviors
-import akka.actor.typed.{ActorRef, PostStop}
+import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
 
 import org.scalatest.wordspec.AnyWordSpecLike
-import akka.actor.typed.Behavior
 
 sealed trait Entity extends Product with Serializable
 final case class Message(text: String, sender: ActorRef[Echo]) extends Entity
