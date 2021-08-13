@@ -13,9 +13,9 @@ import org.json4s.DefaultFormats
 import org.json4s.jackson.JsonMethods._
 import org.scalatest.wordspec.AnyWordSpecLike
 
-import scala.util.{Success, Failure}
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
+import scala.util.{Success, Failure}
 
 sealed trait Digest extends Product with Serializable
 final case class GetJoke(sender: ActorRef[Joke]) extends Digest
@@ -41,9 +41,10 @@ object Rest {
 }
 
 object RestActor {
-  def apply(implicit system: ActorSystem, dispatcher: ExecutionContext): Behavior[Digest] =
-    Behaviors.receive[Digest] { (context, digest) =>
-      digest match {
+  def apply(implicit system: ActorSystem,
+            dispatcher: ExecutionContext): Behavior[Digest] =
+    Behaviors.receive[Digest] {
+      (context, digest) => digest match {
         case GetJoke(sender) =>
           context.log.info("*** GetJoke for {}", sender.path.name)
           context.pipeToSelf( Rest.getJoke ) {

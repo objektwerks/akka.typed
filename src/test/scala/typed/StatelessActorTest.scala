@@ -12,13 +12,13 @@ case object Decrement extends Count
 
 object CountActor {
   def behavior(count: Int = 0): Behavior[Count] =
-    Behaviors.receive { (context, message) =>
-      message match {
+    Behaviors.receive {
+      (context, message) => message match {
         case Increment =>
-          context.log.info(s"*** Increment +1, Count: ${count + 1}")
+          context.log.info("*** Increment +1, Count: ", count + 1)
           behavior(count + 1)
         case Decrement =>
-          context.log.info(s"*** Decrement -1, Count: ${count - 1}")
+          context.log.info("*** Decrement -1, Count: ", count - 1)
           behavior(count - 1)
       }
     }

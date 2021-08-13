@@ -10,8 +10,8 @@ final case class Text(text: String, sender: ActorRef[Echo]) extends Product with
 final case class Echo(text: String) extends Product with Serializable
 
 object TextActor {
-  def apply(): Behavior[Text] = Behaviors.receive[Text] { (context, text) =>
-    text match {
+  def apply(): Behavior[Text] = Behaviors.receive[Text] {
+    (context, text) => text match {
       case Text(text, sender) =>
         context.log.info("*** Text = {} from {}", text, sender.path.name)
         sender ! Echo(text)

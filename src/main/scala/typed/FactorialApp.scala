@@ -43,7 +43,7 @@ object DelegateActor {
       case FactorialsCalculated(numbers) =>
         context.log.info("*** FactorialsCalculated numbers: {}", numbers)
         Behaviors.stopped
-      case _: Calculation => Behaviors.same
+      case _ => Behaviors.same
     }
   }
 }
