@@ -28,7 +28,7 @@ class StatelessActorTest extends ScalaTestWithActorTestKit with AnyWordSpecLike 
   "CountActor behavior" should {
     "increment / decrement" in {
       val testProbe = createTestProbe[Count]("test-count")
-      val countActor = spawn(CountActor.behavior(0), "count-actor")
+      val countActor = spawn(CountActor.behavior(), "count-actor")
       countActor ! Increment
       testProbe.expectNoMessage()
       countActor ! Decrement
