@@ -22,8 +22,8 @@ object EventSourceActor {
   val log = Logger(getClass.getSimpleName)
   val id = EventSourceActor.getClass.getSimpleName
 
-  val commandHandler: (State, Command) => Effect[Event, State] = (_, command) =>
-    command match {
+  val commandHandler: (State, Command) => Effect[Event, State] =
+    (_, command) => command match {
       case Add(data) => Effect
         .persist(Added(data))
         .thenRun(state => log.info(s"*** Add data: {} state: {}", data, state))
@@ -32,8 +32,8 @@ object EventSourceActor {
         .thenRun(state => log.info("*** Clear state: {}", state))
     }
 
-  val eventHandler: (State, Event) => State = (state, event) =>
-    event match {
+  val eventHandler: (State, Event) => State =
+    (state, event) => event match {
       case Added(data) =>
         val newState = state.copy(data :: state.history)
         log.info("*** Added data: {} state: {}", data, newState)
@@ -54,19 +54,20 @@ object EventSourceActor {
 }
 
 object EventSourceApp {
-  def apply(): Behavior[Command] = Behaviors.setup { context =>
-    val eventSourceActor = context.spawn(EventSourceActor(EventSourceActor.id), "event-source-actor")
-    context.log.info("*** EventSourceActor started!")
-    context.watch(eventSourceActor)
-    Behaviors.receiveMessage[Command] {
-      case add: Add =>
-        eventSourceActor ! add
-        Behaviors.same
-      case Clear =>
-        eventSourceActor ! Clear
-        Behaviors.same
+  def apply(): Behavior[Command] =
+    Behaviors.setup { context =>
+      val eventSourceActor = context.spawn(EventSourceActor(EventSourceActor.id), "event-source-actor")
+      context.log.info("*** EventSourceActor started!")
+      context.watch(eventSourceActor)
+      Behaviors.receiveMessage[Command] {
+        case add: Add =>
+          eventSourceActor ! add
+          Behaviors.same
+        case Clear =>
+          eventSourceActor ! Clear
+          Behaviors.same
+      }
     }
-  }
 
   def main(args: Array[String]): Unit = {
     val system = ActorSystem[Command](EventSourceApp(), "event-source-app")

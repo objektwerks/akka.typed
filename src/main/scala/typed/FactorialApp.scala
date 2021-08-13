@@ -11,8 +11,8 @@ final case class CalculateFactorials(numbers: List[Long], sender: ActorRef[Facto
 final case class FactorialsCalculated(numbers: List[Long]) extends Calculation
 
 object FactorialActor {
-  def apply(): Behavior[Calculation] = Behaviors.receive[Calculation] { (context, calculation) =>
-    calculation match {
+  def apply(): Behavior[Calculation] = Behaviors.receive[Calculation] {
+    (context, calculation) => calculation match {
       case CalculateFactorials(numbers, sender) =>
         context.log.info("*** CalculateFactorial numbers: {} sender: {}", numbers, sender.path.name)
         sender ! FactorialsCalculated(numbers.map(n => factorial(n)))
@@ -33,8 +33,8 @@ object FactorialActor {
 }
 
 object DelegateActor {
-  def apply(): Behavior[Calculation] = Behaviors.receive[Calculation] { (context, message) =>
-    message match {
+  def apply(): Behavior[Calculation] = Behaviors.receive[Calculation] {
+    (context, message) => message match {
       case Numbers(numbers) =>
         context.log.info("*** Numbers = {}", numbers)
         val factorialActor = context.spawn(FactorialActor(), "factorial-actor")
@@ -49,11 +49,12 @@ object DelegateActor {
 }
 
 object FactorialApp {
-  def apply(): Behavior[Numbers] = Behaviors.receive[Numbers] { (context, numbers) =>
-    val delegateActor = context.spawn(DelegateActor(), "delegate-actor")
-    context.log.info("*** DelegateActor started!")
-    context.watch(delegateActor)
-    delegateActor ! numbers
+  def apply(): Behavior[Numbers] = Behaviors.receive[Numbers] {
+    (context, numbers) =>
+      val delegateActor = context.spawn(DelegateActor(), "delegate-actor")
+      context.log.info("*** DelegateActor started!")
+      context.watch(delegateActor)
+      delegateActor ! numbers
 
     Behaviors.receiveSignal {
       case (_, Terminated(_)) =>
