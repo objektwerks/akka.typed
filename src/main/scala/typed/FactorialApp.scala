@@ -48,22 +48,23 @@ object DelegateActor {
 }
 
 object FactorialApp {
-  def main(args: Array[String]): Unit = {
-    val behavior = Behaviors.receive[Numbers] { (context, numbers) =>
-      val delegateActor = context.spawn(DelegateActor.behavior, "delegate-actor")
-      context.log.info("*** DelegateActor started!")
-      context.watch(delegateActor)
-      delegateActor ! numbers
+  def apply(): Behavior[Numbers] = Behaviors.receive[Numbers] { (context, numbers) =>
+    val delegateActor = context.spawn(DelegateActor.behavior, "delegate-actor")
+    context.log.info("*** DelegateActor started!")
+    context.watch(delegateActor)
+    delegateActor ! numbers
 
-      Behaviors.receiveSignal {
-        case (_, Terminated(_)) =>
-          context.log.info("*** DelegateActor stopped!")
-          context.log.info("*** FactorialApp terminated!")
-          context.system.terminate()
-          Behaviors.stopped
-      }
+    Behaviors.receiveSignal {
+      case (_, Terminated(_)) =>
+        context.log.info("*** DelegateActor stopped!")
+        context.log.info("*** FactorialApp terminated!")
+        context.system.terminate()
+        Behaviors.stopped
     }
-    val system = ActorSystem(behavior, "factorial-app")
+  }
+
+  def main(args: Array[String]): Unit = {
+    val system = ActorSystem[Numbers](FactorialApp(), "factorial-app")
     system.log.info("*** FactorialApp running!")
     system ! Numbers(List[Long](3, 6, 9))
   }
