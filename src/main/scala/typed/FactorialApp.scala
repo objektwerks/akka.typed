@@ -32,7 +32,7 @@ object FactorialActor {
 }
 
 object DelegateActor {
-  val behavior = Behaviors.receive[Message] { (context, message) =>
+  def apply(): Behavior[Message] = Behaviors.receive[Message] { (context, message) =>
     message match {
       case Numbers(numbers) =>
         context.log.info("*** Numbers = {}", numbers)
@@ -49,7 +49,7 @@ object DelegateActor {
 
 object FactorialApp {
   def apply(): Behavior[Numbers] = Behaviors.receive[Numbers] { (context, numbers) =>
-    val delegateActor = context.spawn(DelegateActor.behavior, "delegate-actor")
+    val delegateActor = context.spawn(DelegateActor(), "delegate-actor")
     context.log.info("*** DelegateActor started!")
     context.watch(delegateActor)
     delegateActor ! numbers
