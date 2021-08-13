@@ -3,6 +3,8 @@ package typed
 import akka.actor.typed._
 import akka.actor.typed.scaladsl.Behaviors
 
+import akka.event.slf4j.Logger
+
 import akka.persistence.typed.PersistenceId
 import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
 
@@ -17,27 +19,28 @@ case object Cleared extends Event
 final case class State(history: List[String] = Nil)
 
 object CombinerActor {
+  val log = Logger(getClass.getSimpleName)
   val id = CombinerActor.getClass.getSimpleName
 
   val commandHandler: (State, Command) => Effect[Event, State] = (_, command) =>
     command match {
       case Add(data) => Effect
         .persist(Added(data))
-        .thenRun(state => println(s"*** Add data: $data state: $state"))
+        .thenRun(state => log.info(s"*** Add data: {} state: {}", data, state))
       case Clear => Effect
         .persist(Cleared)
-        .thenRun(state => println(s"*** Clear state: $state"))
+        .thenRun(state => log.info("*** Clear state: {}", state))
     }
 
   val eventHandler: (State, Event) => State = (state, event) =>
     event match {
       case Added(data) =>
         val newState = state.copy((data :: state.history))
-        println(s"*** Added data: $data state: $newState")
+        log.info("*** Added data: {} state: {}", data, newState)
         newState
       case Cleared => 
         val newState = State(Nil)
-        println(s"*** Cleared state: $newState")
+        log.info("*** Cleared state: {}", newState)
         newState
     }
 
