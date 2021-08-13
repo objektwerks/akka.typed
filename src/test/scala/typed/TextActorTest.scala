@@ -26,11 +26,11 @@ object TextActor {
 
 class TextActorTest extends ScalaTestWithActorTestKit with AnyWordSpecLike {
   "TextActor behavior" should {
-    "message / echo" in {
+    "text / echo" in {
       val testProbe = createTestProbe[Echo]("test-probe")
       val textActor = spawn(TextActor(), "text-actor")
-      textActor ! Text("test", testProbe.ref)
-      testProbe.expectMessage(Echo("test"))
+      textActor ! Text("abc123", testProbe.ref)
+      testProbe.expectMessage(Echo("abc123"))
     }
   }
 }
