@@ -1,20 +1,18 @@
 package typed
 
+import akka.actor.typed.Behavior
+import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
 
 import org.scalatest.wordspec.AnyWordSpecLike
 
+sealed trait Emotion extends Product with Serializable
+case object Happy extends Emotion
+case object Sad extends Emotion
+
 object EmotionActor {
-  import akka.actor.typed.Behavior
-  import akka.actor.typed.scaladsl.Behaviors
-
-  sealed trait Emotion extends Product with Serializable
-  case object Happy extends Emotion
-  case object Sad extends Emotion
-
-  val emotionActorBahvior: Behavior[Emotion] = Behaviors.setup { context =>
+  def apply(): Behavior[Emotion] = Behaviors.setup { context =>
     var level = 0
-
     Behaviors.receiveMessage {
       case Happy =>
         level += 1
@@ -29,12 +27,10 @@ object EmotionActor {
 }
 
 class StatefulActorTest extends ScalaTestWithActorTestKit with AnyWordSpecLike {
-  import EmotionActor._
-
   "EmotionActor behavior" should {
     "happy / sad" in {
       val testProbe = createTestProbe[Emotion]("test-emotion")
-      val emotionActor = spawn(emotionActorBahvior, "emotion-actor")
+      val emotionActor = spawn(EmotionActor(), "emotion-actor")
       emotionActor ! Happy
       testProbe.expectNoMessage()
       emotionActor ! Sad
