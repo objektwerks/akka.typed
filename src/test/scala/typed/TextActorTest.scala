@@ -6,9 +6,8 @@ import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
 
 import org.scalatest.wordspec.AnyWordSpecLike
 
-sealed trait Entity extends Product with Serializable
-final case class Text(text: String, sender: ActorRef[Echo]) extends Entity
-final case class Echo(text: String) extends Entity
+final case class Text(text: String, sender: ActorRef[Echo]) extends Product with Serializable
+final case class Echo(text: String) extends Product with Serializable
 
 object TextActor {
   def apply(): Behavior[Text] = Behaviors.receive[Text] { (context, text) =>

@@ -17,8 +17,9 @@ import scala.util.{Success, Failure}
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 
-final case class GetJoke(sender: ActorRef[Joke]) extends Message
-final case class Joke(text: String, sender: ActorRef[Joke]) extends Message
+sealed trait Digest extends Product with Serializable
+final case class GetJoke(sender: ActorRef[Joke]) extends Digest
+final case class Joke(text: String, sender: ActorRef[Joke]) extends Digest
 
 object Rest {
   implicit lazy val formats = DefaultFormats
@@ -40,9 +41,9 @@ object Rest {
 }
 
 object RestActor {
-  def apply(implicit system: ActorSystem, dispatcher: ExecutionContext): Behavior[Message] =
-    Behaviors.receive[Message] { (context, message) =>
-      message match {
+  def apply(implicit system: ActorSystem, dispatcher: ExecutionContext): Behavior[Digest] =
+    Behaviors.receive[Digest] { (context, digest) =>
+      digest match {
         case GetJoke(sender) =>
           context.log.info("*** GetJoke for {}", sender.path.name)
           context.pipeToSelf( Rest.getJoke ) {
@@ -65,7 +66,7 @@ class RestActorTest extends ScalaTestWithActorTestKit with AnyWordSpecLike {
 
   "RestActor behavior" should {
     "getJoke / joke" in {
-      val testProbe = createTestProbe[Message]("test-rest")
+      val testProbe = createTestProbe[Digest]("test-rest")
       val restActor = spawn(RestActor(system.classicSystem, dispatcher), "rest-actor")
       restActor ! GetJoke(testProbe.ref)
       testProbe.expectMessageType[Joke]
