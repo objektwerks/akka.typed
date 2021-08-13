@@ -18,9 +18,9 @@ case object Cleared extends Event
 
 final case class State(history: List[String] = Nil)
 
-object CombinerActor {
+object EventSourceActor {
   val log = Logger(getClass.getSimpleName)
-  val id = CombinerActor.getClass.getSimpleName
+  val id = EventSourceActor.getClass.getSimpleName
 
   val commandHandler: (State, Command) => Effect[Event, State] = (_, command) =>
     command match {
@@ -38,7 +38,7 @@ object CombinerActor {
         val newState = state.copy(data :: state.history)
         log.info("*** Added data: {} state: {}", data, newState)
         newState
-      case Cleared => 
+      case Cleared =>
         val newState = State(Nil)
         log.info("*** Cleared state: {}", newState)
         newState
@@ -53,29 +53,29 @@ object CombinerActor {
     )
 }
 
-object CombinerApp {
+object EventSourceApp {
   def apply(): Behavior[Command] = Behaviors.setup { context =>
-    val combinerActor = context.spawn(CombinerActor(CombinerActor.id), "combiner-actor")
-    context.log.info("*** CombinerActor started!")
-    context.watch(combinerActor)
+    val eventSourceActor = context.spawn(EventSourceActor(EventSourceActor.id), "event-source-actor")
+    context.log.info("*** EventSourceActor started!")
+    context.watch(eventSourceActor)
     Behaviors.receiveMessage[Command] {
       case add: Add =>
-        combinerActor ! add
+        eventSourceActor ! add
         Behaviors.same
       case Clear =>
-        combinerActor ! Clear
+        eventSourceActor ! Clear
         Behaviors.same
     }
   }
-  
+
   def main(args: Array[String]): Unit = {
-    val system = ActorSystem[Command](CombinerApp(), "combiner-app")
-    system.log.info("*** CombinerApp running ...")
+    val system = ActorSystem[Command](EventSourceApp(), "event-source-app")
+    system.log.info("*** EventSourceApp running ...")
     system ! Add("Hello, ")
     system ! Add("world!")
     system ! Clear
     Thread.sleep(1000L)
-    system.log.info("*** CombinerApp terminated!")
+    system.log.info("*** EventSourceApp terminated!")
     system.terminate()
   }
 }

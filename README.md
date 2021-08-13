@@ -10,5 +10,5 @@ Run
 ---
 1. sbt run
 >Multiple main classes detected. Select one to run:
-1. typed.CombinerApp
+1. typed.EventSourceApp
 2. typed.FactorialApp
