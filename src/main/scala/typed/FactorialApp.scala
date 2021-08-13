@@ -1,6 +1,5 @@
 package typed
 
-import akka.NotUsed
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed._
 
@@ -14,7 +13,7 @@ object FactorialActor {
   val behavior = Behaviors.receive[Message] { (context, message) =>
     message match {
       case CalculateFactorials(numbers, sender) =>
-        context.log.info("*** CalculateFactorial.numbers = {} from {}", numbers, sender.path.name)
+        context.log.info("*** CalculateFactorial numbers = {} sender {}", numbers, sender.path.name)
         sender ! FactorialsCalculated(numbers.map(n => factorial(n)))
         Behaviors.same
       case _: Message => Behaviors.same
@@ -36,12 +35,12 @@ object DelegateActor {
   val behavior = Behaviors.receive[Message] { (context, message) =>
     message match {
       case Numbers(numbers) =>
-        context.log.info("*** Numbers.numbers = {}", numbers)
+        context.log.info("*** Numbers = {}", numbers)
         val factorialActor = context.spawn(FactorialActor.behavior, "factorial-actor")
         factorialActor ! CalculateFactorials(numbers, context.self)
         Behaviors.same
       case FactorialsCalculated(numbers) =>
-        context.log.info("*** FactorialsCalculated.numbers: {}", numbers)
+        context.log.info("*** FactorialsCalculated numbers: {}", numbers)
         Behaviors.stopped
       case _: Message => Behaviors.same
     }
@@ -50,11 +49,11 @@ object DelegateActor {
 
 object FactorialApp {
   def main(args: Array[String]): Unit = {
-    val behavior = Behaviors.setup[NotUsed] { context =>
+    val behavior = Behaviors.receive[Numbers] { (context, numbers) =>
       val delegateActor = context.spawn(DelegateActor.behavior, "delegate-actor")
       context.log.info("*** DelegateActor started!")
       context.watch(delegateActor)
-      delegateActor ! Numbers(List[Long](3, 6, 9))
+      delegateActor ! numbers
 
       Behaviors.receiveSignal {
         case (_, Terminated(_)) =>
@@ -64,7 +63,8 @@ object FactorialApp {
           Behaviors.stopped
       }
     }
-    ActorSystem(behavior, "factorial-app")
-    println("*** FactorialApp running!")
+    val system = ActorSystem(behavior, "factorial-app")
+    system.log.info("*** FactorialApp running!")
+    system ! Numbers(List[Long](3, 6, 9))
   }
 }
