@@ -1,6 +1,6 @@
 package typed
 
-import akka.actor.typed.Behavior
+import akka.actor.typed.{Behavior, PostStop}
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
 
@@ -11,9 +11,9 @@ case object Happy extends Emotion
 case object Sad extends Emotion
 
 object EmotionActor {
-  def apply(): Behavior[Emotion] = Behaviors.setup { context =>
+  def apply(): Behavior[Emotion] = Behaviors.setup[Emotion] { context =>
     var level = 0
-    Behaviors.receiveMessage {
+    Behaviors.receiveMessage[Emotion] {
       case Happy =>
         level += 1
         context.log.info(s"*** Happy +1, Emotion level: $level")
@@ -21,6 +21,10 @@ object EmotionActor {
       case Sad =>
         level -= 1
         context.log.info(s"*** Sad -1, Emotion level: $level")
+        Behaviors.same
+    }.receiveSignal {
+      case (context, PostStop) =>
+        context.log.info("*** EmotionActor stopped!")
         Behaviors.same
     }
   }

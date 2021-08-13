@@ -1,7 +1,7 @@
 package typed
 
 import akka.actor.ActorSystem
-import akka.actor.typed.{ActorRef, Behavior}
+import akka.actor.typed.{ActorRef, Behavior, PostStop}
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
 
@@ -15,7 +15,7 @@ import org.scalatest.wordspec.AnyWordSpecLike
 
 import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
-import scala.util.{Success, Failure}
+import scala.util.{Failure, Success}
 
 sealed trait Digest extends Product with Serializable
 final case class GetJoke(sender: ActorRef[Joke]) extends Digest
@@ -42,23 +42,26 @@ object Rest {
 
 object RestActor {
   def apply(implicit system: ActorSystem,
-            dispatcher: ExecutionContext): Behavior[Digest] =
-    Behaviors.receive[Digest] {
-      (context, digest) => digest match {
-        case GetJoke(sender) =>
-          context.log.info("*** GetJoke for {}", sender.path.name)
-          context.pipeToSelf( Rest.getJoke ) {
-            case Success(text) => Joke(text, sender)
-            case Failure(failure) => Joke(failure.getMessage, sender)
-          }
-          Behaviors.same
-        case joke @ Joke(text, sender) =>
-          context.log.info("*** Joke {} for {}", text, sender)
-          sender ! joke
-          Behaviors.same
-        case _ => Behaviors.same
-      }
+            dispatcher: ExecutionContext): Behavior[Digest] = Behaviors.receive[Digest] {
+    (context, digest) => digest match {
+      case GetJoke(sender) =>
+        context.log.info("*** GetJoke for {}", sender.path.name)
+        context.pipeToSelf( Rest.getJoke ) {
+          case Success(text) => Joke(text, sender)
+          case Failure(failure) => Joke(failure.getMessage, sender)
+        }
+        Behaviors.same
+      case joke @ Joke(text, sender) =>
+        context.log.info("*** Joke {} for {}", text, sender)
+        sender ! joke
+        Behaviors.same
+      case _ => Behaviors.same
     }
+  }.receiveSignal {
+    case (context, PostStop) =>
+      context.log.info("*** RestActor stopped!")
+      Behaviors.same
+  }
 }
 
 class RestActorTest extends ScalaTestWithActorTestKit with AnyWordSpecLike {

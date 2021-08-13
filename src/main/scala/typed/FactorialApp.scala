@@ -45,6 +45,10 @@ object DelegateActor {
         Behaviors.stopped
       case _ => Behaviors.same
     }
+  }.receiveSignal {
+    case (context, PostStop) =>
+      context.log.info("*** DelegateActor stopped!")
+      Behaviors.same
   }
 }
 
@@ -58,7 +62,6 @@ object FactorialApp {
 
     Behaviors.receiveSignal {
       case (_, Terminated(_)) =>
-        context.log.info("*** DelegateActor stopped!")
         context.log.info("*** FactorialApp terminated!")
         context.system.terminate()
         Behaviors.stopped
