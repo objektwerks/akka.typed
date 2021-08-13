@@ -19,14 +19,17 @@ final case class State(history: List[String] = Nil)
 object CombinerActor {
   val id = CombinerActor.getClass.getSimpleName
 
-  val commandHandler: (State, Command) => Effect[Event, State] = { (_, command) =>
+  val commandHandler: (State, Command) => Effect[Event, State] = (_, command) =>
     command match {
-      case Add(data) => Effect.persist(Added(data)).thenRun(state => println(s"*** Add data: $data state: $state"))
-      case Clear => Effect.persist(Cleared).thenRun(state => println(s"*** Clear state: $state"))
+      case Add(data) => Effect
+        .persist(Added(data))
+        .thenRun(state => println(s"*** Add data: $data state: $state"))
+      case Clear => Effect
+        .persist(Cleared)
+        .thenRun(state => println(s"*** Clear state: $state"))
     }
-  }
 
-  val eventHandler: (State, Event) => State = { (state, event) =>
+  val eventHandler: (State, Event) => State = (state, event) =>
     event match {
       case Added(data) =>
         val newState = state.copy((data :: state.history))
@@ -37,7 +40,6 @@ object CombinerActor {
         println(s"*** Cleared state: $newState")
         newState
     }
-  }
 
   def apply(id: String): Behavior[Command] =
     EventSourcedBehavior[Command, Event, State](
