@@ -3,8 +3,8 @@ package typed
 import akka.actor.typed._
 import akka.actor.typed.scaladsl.Behaviors
 
-import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
 import akka.persistence.typed.PersistenceId
+import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
 
 sealed trait Command extends Message
 final case class Add(data: String) extends Command

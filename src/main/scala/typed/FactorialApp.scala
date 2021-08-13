@@ -1,7 +1,7 @@
 package typed
 
-import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed._
+import akka.actor.typed.scaladsl.Behaviors
 
 import scala.annotation.tailrec
 
@@ -10,10 +10,10 @@ final case class CalculateFactorials(numbers: List[Long], sender: ActorRef[Facto
 final case class FactorialsCalculated(numbers: List[Long]) extends Message
 
 object FactorialActor {
-  val behavior = Behaviors.receive[Message] { (context, message) =>
+  def apply(): Behavior[Message] = Behaviors.receive[Message] { (context, message) =>
     message match {
       case CalculateFactorials(numbers, sender) =>
-        context.log.info("*** CalculateFactorial numbers = {} sender {}", numbers, sender.path.name)
+        context.log.info("*** CalculateFactorial numbers: {} sender: {}", numbers, sender.path.name)
         sender ! FactorialsCalculated(numbers.map(n => factorial(n)))
         Behaviors.same
       case _: Message => Behaviors.same
@@ -36,7 +36,7 @@ object DelegateActor {
     message match {
       case Numbers(numbers) =>
         context.log.info("*** Numbers = {}", numbers)
-        val factorialActor = context.spawn(FactorialActor.behavior, "factorial-actor")
+        val factorialActor = context.spawn(FactorialActor(), "factorial-actor")
         factorialActor ! CalculateFactorials(numbers, context.self)
         Behaviors.same
       case FactorialsCalculated(numbers) =>
