@@ -7,8 +7,6 @@ import akka.actor.typed.scaladsl.Behaviors
 import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
 import akka.persistence.typed.PersistenceId
 
-sealed trait Message extends Product with Serializable
-
 sealed trait Command extends Message
 final case class Add(data: String) extends Command
 case object Clear extends Command
@@ -52,18 +50,17 @@ object CombinerActor {
 }
 
 object CombinerApp {
-  val appBehavior = Behaviors.setup[NotUsed] { context =>
-    val combinerActor = context.spawn(CombinerActor(CombinerActor.id), "combiner-actor")
-    context.log.info("*** CombinerActor started!")
-    context.watch(combinerActor)
-    combinerActor ! Add("Hello, ")
-    combinerActor ! Add("world!")
-    combinerActor ! Clear
-    Behaviors.same
-  }
-  val system = ActorSystem(appBehavior, "combiner-app")
-
   def main(args: Array[String]): Unit = {
+    val behavior = Behaviors.setup[NotUsed] { context =>
+      val combinerActor = context.spawn(CombinerActor(CombinerActor.id), "combiner-actor")
+      context.log.info("*** CombinerActor started!")
+      context.watch(combinerActor)
+      combinerActor ! Add("Hello, ")
+      combinerActor ! Add("world!")
+      combinerActor ! Clear
+      Behaviors.same
+    }
+    val system = ActorSystem(behavior, "combiner-app")
     println("*** CombinerApp running ...")
     Thread.sleep(1000L)
     system.terminate()

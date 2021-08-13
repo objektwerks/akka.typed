@@ -4,21 +4,14 @@ import akka.NotUsed
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.typed._
 
-import typed.FactorialActor.factorialActorBehavior
-
 import scala.annotation.tailrec
 
-object Messages {
-  sealed trait Message extends Product with Serializable
-  final case class Numbers(numbers: List[Long]) extends Message
-  final case class CalculateFactorials(numbers: List[Long], sender: ActorRef[FactorialsCalculated]) extends Message
-  final case class FactorialsCalculated(numbers: List[Long]) extends Message
-}
+final case class Numbers(numbers: List[Long]) extends Message
+final case class CalculateFactorials(numbers: List[Long], sender: ActorRef[FactorialsCalculated]) extends Message
+final case class FactorialsCalculated(numbers: List[Long]) extends Message
 
 object FactorialActor {
-  import Messages._
-
-  val factorialActorBehavior = Behaviors.receive[Message] { (context, message) =>
+  val behavior = Behaviors.receive[Message] { (context, message) =>
     message match {
       case CalculateFactorials(numbers, sender) =>
         context.log.info("*** CalculateFactorial.numbers = {} from {}", numbers, sender.path.name)
@@ -40,13 +33,11 @@ object FactorialActor {
 }
 
 object DelegateActor {
-  import Messages._
-
-  val delegateActorBehavior = Behaviors.receive[Message] { (context, message) =>
+  val behavior = Behaviors.receive[Message] { (context, message) =>
     message match {
       case Numbers(numbers) =>
         context.log.info("*** Numbers.numbers = {}", numbers)
-        val factorialActor = context.spawn(factorialActorBehavior, "factorial-actor")
+        val factorialActor = context.spawn(FactorialActor.behavior, "factorial-actor")
         factorialActor ! CalculateFactorials(numbers, context.self)
         Behaviors.same
       case FactorialsCalculated(numbers) =>
@@ -58,26 +49,22 @@ object DelegateActor {
 }
 
 object FactorialApp {
-  val appBehavior = Behaviors.setup[NotUsed] { context =>
-    import DelegateActor._
-    import Messages._
-
-    val delegateActor = context.spawn(delegateActorBehavior, "delegate-actor")
-    context.log.info("*** DelegateActor started!")
-    context.watch(delegateActor)
-    delegateActor ! Numbers(List[Long](3, 6, 9))
-
-    Behaviors.receiveSignal {
-      case (_, Terminated(_)) =>
-        context.log.info("*** DelegateActor stopped!")
-        context.log.info("*** FactorialApp terminated!")
-        context.system.terminate()
-        Behaviors.stopped
-    }
-  }
-  val system = ActorSystem(appBehavior, "factorial-app")
-
   def main(args: Array[String]): Unit = {
+    val behavior = Behaviors.setup[NotUsed] { context =>
+      val delegateActor = context.spawn(DelegateActor.behavior, "delegate-actor")
+      context.log.info("*** DelegateActor started!")
+      context.watch(delegateActor)
+      delegateActor ! Numbers(List[Long](3, 6, 9))
+
+      Behaviors.receiveSignal {
+        case (_, Terminated(_)) =>
+          context.log.info("*** DelegateActor stopped!")
+          context.log.info("*** FactorialApp terminated!")
+          context.system.terminate()
+          Behaviors.stopped
+      }
+    }
+    ActorSystem(behavior, "factorial-app")
     println("*** FactorialApp running!")
   }
 }
