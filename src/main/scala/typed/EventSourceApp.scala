@@ -10,6 +10,8 @@ import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
 
 sealed trait Command extends Product with Serializable
 final case class Add(data: String) extends Command
+final case class Get(sender: ActorRef[Command]) extends Command
+final case class Print(state: List[String]) extends Command
 case object Clear extends Command
 
 sealed trait Event extends Product with Serializable
@@ -27,9 +29,13 @@ object EventSourceActor {
       case Add(data) => Effect
         .persist(Added(data))
         .thenRun(state => log.info(s"*** Add data: {} state: {}", data, state))
+      case Get(sender) => Effect
+        .none
+        .thenReply(sender)(state => Print(state.history))
       case Clear => Effect
         .persist(Cleared)
         .thenRun(state => log.info("*** Clear state: {}", state))
+      case _ => Effect.none
     }
 
   val eventHandler: (State, Event) => State =
@@ -63,6 +69,12 @@ object EventSourceApp {
       case add: Add =>
         eventSourceActor ! add
         Behaviors.same
+      case get: Get =>
+        eventSourceActor ! get
+        Behaviors.same
+      case Print(state) =>
+        context.log.info("*** State: ", state)
+        Behaviors.same
       case Clear =>
         eventSourceActor ! Clear
         Behaviors.same
@@ -74,6 +86,7 @@ object EventSourceApp {
     system.log.info("*** EventSourceApp running ...")
     system ! Add("Hello, ")
     system ! Add("world!")
+    system ! Get(system)
     system ! Clear
     Thread.sleep(1000L)
     system.log.info("*** EventSourceApp terminated!")
