@@ -45,7 +45,7 @@ object EventSourceActor {
         log.info("*** Added data: {} state: {}", data, newState)
         newState
       case Cleared =>
-        val newState = State(Nil)
+        val newState = State()
         log.info("*** Cleared state: {}", newState)
         newState
     }
@@ -53,7 +53,7 @@ object EventSourceActor {
   def apply(id: String): Behavior[Command] =
     EventSourcedBehavior[Command, Event, State](
       persistenceId = PersistenceId.ofUniqueId(id),
-      emptyState = State(Nil),
+      emptyState = State(),
       commandHandler = commandHandler,
       eventHandler = eventHandler
     )
