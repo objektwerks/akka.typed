@@ -66,9 +66,7 @@ object EventSourceApp {
     context.watch(eventSourceActor)
 
     Behaviors.receive[Command] {
-      // ctx must be named differently than the
-      // above context for logging to work correctly
-      (ctx, command) => command match {
+      (context, command) => command match {
         case add: Add =>
           eventSourceActor ! add
           Behaviors.same
@@ -76,7 +74,7 @@ object EventSourceApp {
           eventSourceActor ! get
           Behaviors.same
         case Print(state) =>
-          ctx.log.info(s"*** Print: $state")
+          context.log.info("*** Print: {}", state)
           Behaviors.same
         case Clear =>
           eventSourceActor ! Clear
