@@ -65,19 +65,23 @@ object EventSourceApp {
     context.log.info("*** EventSourceActor started!")
     context.watch(eventSourceActor)
 
-    Behaviors.receiveMessage[Command] {
-      case add: Add =>
-        eventSourceActor ! add
-        Behaviors.same
-      case get: Get =>
-        eventSourceActor ! get
-        Behaviors.same
-      case Print(state) =>
-        context.log.info("*** State: ", state)
-        Behaviors.same
-      case Clear =>
-        eventSourceActor ! Clear
-        Behaviors.same
+    Behaviors.receive[Command] {
+      // ctx must be named differently than the
+      // above context for logging to work correctly
+      (ctx, command) => command match {
+        case add: Add =>
+          eventSourceActor ! add
+          Behaviors.same
+        case get: Get =>
+          eventSourceActor ! get
+          Behaviors.same
+        case Print(state) =>
+          ctx.log.info(s"*** Print: $state")
+          Behaviors.same
+        case Clear =>
+          eventSourceActor ! Clear
+          Behaviors.same
+      }
     }
   }
 
