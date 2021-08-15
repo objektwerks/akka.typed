@@ -32,45 +32,43 @@ object FactorialActor {
   }
 }
 
-object DelegateActor {
-  def apply(): Behavior[Calculation] = Behaviors.receive[Calculation] {
-    (context, message) => message match {
-      case Numbers(numbers) =>
-        context.log.info("*** Numbers = {}", numbers)
-        val factorialActor = context.spawn(FactorialActor(), "factorial-actor")
-        factorialActor ! CalculateFactorials(numbers, context.self)
+object CalculationActor {
+  def apply(): Behavior[Calculation] = Behaviors.setup { context =>
+    val factorialActor = context.spawn(FactorialActor(), "factorial-actor")
+    context.log.info("*** CalculationActor started!")
+    context.watch(factorialActor)
+
+    Behaviors.receive[Calculation] {
+      (context, message) =>
+        message match {
+          case Numbers(numbers) =>
+            context.log.info("*** Numbers = {}", numbers)
+            factorialActor ! CalculateFactorials(numbers, context.self)
+            Behaviors.same
+          case FactorialsCalculated(numbers) =>
+            context.log.info("*** FactorialsCalculated numbers: {}", numbers)
+            Behaviors.same
+          case _ => Behaviors.same
+        }
+    }.receiveSignal {
+      case (context, PostStop) =>
+        context.log.info("*** CalculationActor stopped!")
         Behaviors.same
-      case FactorialsCalculated(numbers) =>
-        context.log.info("*** FactorialsCalculated numbers: {}", numbers)
-        Behaviors.stopped
-      case _ => Behaviors.same
     }
-  }.receiveSignal {
-    case (context, PostStop) =>
-      context.log.info("*** DelegateActor stopped!")
-      Behaviors.same
   }
 }
 
 object FactorialApp {
-  def apply(): Behavior[Numbers] = Behaviors.receive[Numbers] {
-    (context, numbers) =>
-      val delegateActor = context.spawn(DelegateActor(), "delegate-actor")
-      context.log.info("*** DelegateActor started!")
-      context.watch(delegateActor)
-      delegateActor ! numbers
-
-    Behaviors.receiveSignal {
-      case (_, Terminated(_)) =>
-        context.log.info("*** FactorialApp terminated!")
-        context.system.terminate()
-        Behaviors.stopped
-    }
-  }
-
   def main(args: Array[String]): Unit = {
-    val system = ActorSystem[Numbers](FactorialApp(), "factorial-app")
+    val system = ActorSystem[Calculation](CalculationActor(), "factorial-app")
     system.log.info("*** FactorialApp running!")
-    system ! Numbers(List[Long](3, 6, 9))
+    system ! Numbers(List[Long](1, 2, 3))
+    Thread.sleep(1000L)
+    system ! Numbers(List[Long](4, 5, 6))
+    Thread.sleep(1000L)
+    system ! Numbers(List[Long](7, 8, 9))
+    Thread.sleep(1000L)
+    system.log.info("*** FactorialApp terminating ...")
+    system.terminate()
   }
 }
