@@ -91,7 +91,7 @@ object EventSourceApp {
     system ! Get(system)
     system ! Clear
     Thread.sleep(1000L)
-    system.log.info("*** EventSourceApp terminated!")
+    system.log.info("*** EventSourceApp terminating ...")
     system.terminate()
   }
 }
