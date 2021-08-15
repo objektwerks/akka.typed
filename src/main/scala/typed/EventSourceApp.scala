@@ -79,6 +79,10 @@ object EventSourceApp {
           eventSourceActor ! Clear
           Behaviors.same
       }
+    }.receiveSignal {
+      case (context, PostStop) =>
+        context.log.info("*** EventSourceApp behavior stopped!")
+        Behaviors.same
     }
   }
 
