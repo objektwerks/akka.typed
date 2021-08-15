@@ -63,7 +63,6 @@ object EventSourceApp {
   def apply(): Behavior[Command] = Behaviors.setup { context =>
     val eventSourceActor = context.spawn(EventSourceActor(EventSourceActor.id), "event-source-actor")
     context.log.info("*** EventSourceActor started!")
-    context.watch(eventSourceActor)
 
     Behaviors.receive[Command] {
       (context, command) => command match {
