@@ -12,5 +12,6 @@ Run
 >Multiple main classes detected. Select one to run:
 1. typed.EventSourceApp
 2. typed.FactorialApp
-3. typed.PingFpApp
-4. typed.PingOoApp
+3. typed.NowApp
+4. typed.PingFpApp
+5. typed.PingOoApp
