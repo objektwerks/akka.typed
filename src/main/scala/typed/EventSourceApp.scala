@@ -60,7 +60,7 @@ object EventSourceActor {
 }
 
 object EventSourceApp {
-  def apply(): Behavior[Command] = Behaviors.setup { context =>
+  def apply(): Behavior[Command] = Behaviors.setup[Command] { context =>
     val eventSourceActor = context.spawn(EventSourceActor(EventSourceActor.id), "event-source-actor")
     context.log.info("*** EventSourceActor started!")
     context.watch(eventSourceActor)
