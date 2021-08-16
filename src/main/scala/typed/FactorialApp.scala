@@ -33,22 +33,21 @@ object FactorialActor {
 }
 
 object CalculationActor {
-  def apply(): Behavior[Calculation] = Behaviors.setup { context =>
+  def apply(): Behavior[Calculation] = Behaviors.setup[Calculation] { context =>
     val factorialActor = context.spawn(FactorialActor(), "factorial-actor")
     context.log.info("*** FactorialActor started!")
 
     Behaviors.receive[Calculation] {
-      (context, message) =>
-        message match {
-          case Calculate(numbers) =>
-            context.log.info("*** Calculate numbers = {}", numbers)
-            factorialActor ! CalculateFactorials(numbers, context.self)
-            Behaviors.same
-          case FactorialsCalculated(numbers) =>
-            context.log.info("*** FactorialsCalculated numbers: {}", numbers)
-            Behaviors.same
-          case _ => Behaviors.same
-        }
+      (context, message) => message match {
+        case Calculate(numbers) =>
+          context.log.info("*** Calculate numbers = {}", numbers)
+          factorialActor ! CalculateFactorials(numbers, context.self)
+          Behaviors.same
+        case FactorialsCalculated(numbers) =>
+          context.log.info("*** FactorialsCalculated numbers: {}", numbers)
+          Behaviors.same
+        case _ => Behaviors.same
+      }
     }.receiveSignal {
       case (context, PostStop) =>
         context.log.info("*** CalculationActor stopped!")
