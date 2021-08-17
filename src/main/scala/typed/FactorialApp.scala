@@ -7,15 +7,15 @@ import scala.annotation.tailrec
 
 sealed trait Calculation extends Product with Serializable
 final case class Calculate(numbers: List[Long]) extends Calculation
-final case class CalculateFactorials(numbers: List[Long], sender: ActorRef[Calculation]) extends Calculation
+final case class CalculateFactorials(numbers: List[Long], replyTo: ActorRef[Calculation]) extends Calculation
 final case class FactorialsCalculated(numbers: List[Long]) extends Calculation
 
 object FactorialActor {
   def apply(): Behavior[Calculation] = Behaviors.receive[Calculation] {
     (context, calculation) => calculation match {
-      case CalculateFactorials(numbers, sender) =>
-        context.log.info("*** CalculateFactorial numbers: {} sender: {}", numbers, sender.path.name)
-        sender ! FactorialsCalculated(numbers.map(n => factorial(n)))
+      case CalculateFactorials(numbers, replyTo) =>
+        context.log.info("*** CalculateFactorial numbers: {} replyTo: {}", numbers, replyTo.path.name)
+        replyTo ! FactorialsCalculated(numbers.map(n => factorial(n)))
         Behaviors.same
       case _: Calculation => Behaviors.same
     }
