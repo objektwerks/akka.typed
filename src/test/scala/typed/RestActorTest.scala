@@ -17,9 +17,9 @@ import scala.concurrent.ExecutionContext
 import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
-sealed trait Digest extends Product with Serializable
-final case class GetJoke(replyTo: ActorRef[Joke]) extends Digest
-final case class Joke(text: String, replyTo: ActorRef[Joke]) extends Digest
+sealed trait Jokes extends Product with Serializable
+final case class GetJoke(replyTo: ActorRef[Joke]) extends Jokes
+final case class Joke(text: String, replyTo: ActorRef[Joke]) extends Jokes
 
 object Rest {
   implicit lazy val formats = DefaultFormats
@@ -35,15 +35,15 @@ object Rest {
   }
 
   def parseJson(json: String): String = {
-    val jValue = parse(json) 
+    val jValue = parse(json)
     (jValue \ "value" \ "joke").extract[String]
   }
 }
 
 object RestActor {
   def apply(implicit system: ActorSystem,
-            dispatcher: ExecutionContext): Behavior[Digest] = Behaviors.receive[Digest] {
-    (context, digest) => digest match {
+            dispatcher: ExecutionContext): Behavior[Jokes] = Behaviors.receive[Jokes] {
+    (context, jokes) => jokes match {
       case GetJoke(replyTo) =>
         context.log.info("*** GetJoke for {}", replyTo.path.name)
         context.pipeToSelf( Rest.getJoke ) {
@@ -70,7 +70,7 @@ class RestActorTest extends ScalaTestWithActorTestKit with AnyWordSpecLike {
 
   "RestActor behavior" should {
     "getJoke / joke" in {
-      val testProbe = createTestProbe[Digest]("test-rest")
+      val testProbe = createTestProbe[Jokes]("test-rest")
       val restActor = spawn(RestActor(system.classicSystem, dispatcher), "rest-actor")
       restActor ! GetJoke(testProbe.ref)
       testProbe.expectMessageType[Joke]
