@@ -18,8 +18,8 @@ import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 sealed trait Digest extends Product with Serializable
-final case class GetJoke(sender: ActorRef[Joke]) extends Digest
-final case class Joke(text: String, sender: ActorRef[Joke]) extends Digest
+final case class GetJoke(replyTo: ActorRef[Joke]) extends Digest
+final case class Joke(text: String, replyTo: ActorRef[Joke]) extends Digest
 
 object Rest {
   implicit lazy val formats = DefaultFormats
@@ -44,16 +44,16 @@ object RestActor {
   def apply(implicit system: ActorSystem,
             dispatcher: ExecutionContext): Behavior[Digest] = Behaviors.receive[Digest] {
     (context, digest) => digest match {
-      case GetJoke(sender) =>
-        context.log.info("*** GetJoke for {}", sender.path.name)
+      case GetJoke(replyTo) =>
+        context.log.info("*** GetJoke for {}", replyTo.path.name)
         context.pipeToSelf( Rest.getJoke ) {
-          case Success(text) => Joke(text, sender)
-          case Failure(failure) => Joke(failure.getMessage, sender)
+          case Success(text) => Joke(text, replyTo)
+          case Failure(failure) => Joke(failure.getMessage, replyTo)
         }
         Behaviors.same
-      case joke @ Joke(text, sender) =>
-        context.log.info("*** Joke {} for {}", text, sender)
-        sender ! joke
+      case joke @ Joke(text, replyTo) =>
+        context.log.info("*** Joke {} for {}", text, replyTo)
+        replyTo ! joke
         Behaviors.same
       case _ => Behaviors.same
     }
