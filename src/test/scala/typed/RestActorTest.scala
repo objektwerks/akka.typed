@@ -1,7 +1,7 @@
 package typed
 
 import akka.actor.ActorSystem
-import akka.actor.typed.{ActorRef, Behavior, PostStop}
+import akka.actor.typed.{ActorRef, Behavior, PostStop, SupervisorStrategy}
 import akka.actor.typed.scaladsl.Behaviors
 import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
 
@@ -30,7 +30,6 @@ object Rest {
       Unmarshal(response)
         .to[String]
         .map { json => s"${parseJson(json)}" }
-        .recover { case error => s"${error.getMessage}" }
     }
   }
 
@@ -71,7 +70,11 @@ class RestActorTest extends ScalaTestWithActorTestKit with AnyWordSpecLike {
   "RestActor behavior" should {
     "getJoke / joke" in {
       val testProbe = createTestProbe[Jokes]("test-rest")
-      val restActor = spawn(RestActor(system.classicSystem, dispatcher), "rest-actor")
+      val restActorBehavior = RestActor(system.classicSystem, dispatcher)
+      Behaviors
+        .supervise(restActorBehavior)
+        .onFailure[Exception](SupervisorStrategy.restart)
+      val restActor = spawn(restActorBehavior, "rest-actor")
       restActor ! GetJoke(testProbe.ref)
       testProbe.expectMessageType[Joke]
     }
