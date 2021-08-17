@@ -6,15 +6,15 @@ import akka.actor.testkit.typed.scaladsl.ScalaTestWithActorTestKit
 
 import org.scalatest.wordspec.AnyWordSpecLike
 
-final case class Text(text: String, sender: ActorRef[Echo]) extends Product with Serializable
+final case class Text(text: String, replyTo: ActorRef[Echo]) extends Product with Serializable
 final case class Echo(text: String) extends Product with Serializable
 
 object TextActor {
   def apply(): Behavior[Text] = Behaviors.receive[Text] {
     (context, text) => text match {
-      case Text(text, sender) =>
-        context.log.info("*** Text = {} from {}", text, sender.path.name)
-        sender ! Echo(text)
+      case Text(text, replyTo) =>
+        context.log.info("*** Text = {} from {}", text, replyTo.path.name)
+        replyTo ! Echo(text)
         Behaviors.same
     }
   }.receiveSignal {
