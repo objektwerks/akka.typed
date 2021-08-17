@@ -10,7 +10,7 @@ import akka.persistence.typed.scaladsl.{Effect, EventSourcedBehavior}
 
 sealed trait Command extends Product with Serializable
 final case class Add(data: String) extends Command
-final case class Get(sender: ActorRef[Command]) extends Command
+final case class Get(replyTo: ActorRef[Command]) extends Command
 final case class Print(state: State) extends Command
 case object Clear extends Command
 
@@ -29,9 +29,9 @@ object EventSourceActor {
       case Add(data) => Effect
         .persist(Added(data))
         .thenRun(state => log.info(s"*** Add data: {} state: {}", data, state))
-      case Get(sender) => Effect
+      case Get(replyTo) => Effect
         .none
-        .thenReply(sender)(state => Print(state))
+        .thenReply(replyTo)(state => Print(state))
       case Clear => Effect
         .persist(Cleared)
         .thenRun(state => log.info("*** Clear state: {}", state))
