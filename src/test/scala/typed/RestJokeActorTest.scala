@@ -14,7 +14,7 @@ sealed trait Jokes extends Product with Serializable
 final case class GetJoke(replyTo: ActorRef[Joke]) extends Jokes
 final case class Joke(text: String, replyTo: ActorRef[Joke]) extends Jokes
 
-object RestActor {
+object JokeActor {
   def apply(implicit system: ActorSystem,
             dispatcher: ExecutionContext): Behavior[Jokes] = Behaviors.receive[Jokes] {
     (context, jokes) => jokes match {
@@ -33,19 +33,19 @@ object RestActor {
     }
   }.receiveSignal {
     case (context, PostStop) =>
-      context.log.info("*** RestActor stopped!")
+      context.log.info("*** RestJokeActor stopped!")
       Behaviors.same
   }
 }
 
-class RestActorTest extends ScalaTestWithActorTestKit with AnyWordSpecLike {
+class RestJokeActorTest extends ScalaTestWithActorTestKit with AnyWordSpecLike {
   implicit override val system = testKit.internalSystem
   implicit val dispatcher = system.executionContext
 
-  "RestActor behavior" should {
+  "RestJokeActor behavior" should {
     "getJoke / joke" in {
       val testProbe = createTestProbe[Jokes]("test-rest")
-      val restActorBehavior = RestActor(system.classicSystem, dispatcher)
+      val restActorBehavior = JokeActor(system.classicSystem, dispatcher)
       Behaviors
         .supervise(restActorBehavior)
         .onFailure[Exception](SupervisorStrategy.restart)
