@@ -3,7 +3,7 @@ organization := "objektwerks"
 version := "0.1-SNAPSHOT"
 scalaVersion := "2.13.6"
 libraryDependencies ++= {
-  val akkaVersion = "2.6.16"
+  val akkaVersion = "2.6.17"
   val akkaHttpVersion = "10.2.6"
   val json4sVersion = "4.0.3"
   Seq(
