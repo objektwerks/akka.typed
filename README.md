@@ -1,6 +1,6 @@
 Akka Typed
 ----------
->Akka Typed app and tests, to include an Akka-Http client.
+>Akka Typed app and tests, to include Akka Persistence and an Akka-Http client.
 
 Test
 ----
