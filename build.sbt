@@ -16,7 +16,7 @@ libraryDependencies ++= {
     "org.json4s" %% "json4s-native" % json4sVersion,
     "org.iq80.leveldb" % "leveldb" % "0.12",
     "org.fusesource.leveldbjni" % "leveldbjni-all" % "1.8",
-    "ch.qos.logback" % "logback-classic" % "1.2.9",
+    "ch.qos.logback" % "logback-classic" % "1.2.10",
     "com.typesafe.akka" %% "akka-actor-testkit-typed" % akkaVersion % Test,
     "com.typesafe.akka" %% "akka-persistence-testkit" % akkaVersion % Test,
     "org.scalatest" %% "scalatest" % "3.2.10" % Test
