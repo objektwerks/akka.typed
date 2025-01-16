@@ -1,7 +1,7 @@
 name := "akka.typed"
 organization := "objektwerks"
 version := "0.1-SNAPSHOT"
-scalaVersion := "2.13.15"
+scalaVersion := "2.13.16"
 libraryDependencies ++= {
   val akkaVersion = "2.6.21" // Don't upgrade due to BUSL 1.1!
   val akkaHttpVersion = "10.2.10" // Don't upgrade due to BUSL 1.1!
